@@ -1,6 +1,13 @@
 const express = require("express");
 
+const fs = require("fs");
 const app = express();
+//READ TOURS DATA FROM JSON FILE
+const tours = JSON.parse(
+  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`, {
+    encoding: "utf-8",
+  })
+);
 
 app.get("/", (req, res) => {
   res.status(200).json({
@@ -10,15 +17,14 @@ app.get("/", (req, res) => {
   });
 });
 
-app.post("/", (req, res) => {
+app.get("/api/v1/tours", (req, res) => {
   res.status(200).json({
     status: "success",
-    message: "You can now send a post request to this URL",
+    results: tours.length,
+    data: {
+      tours,
+    },
   });
-});
-
-app.get("/test", (req, res) => {
-  res.status(300).send("Hello there");
 });
 
 const port = 3000;
