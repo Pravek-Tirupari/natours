@@ -18,6 +18,17 @@ const checkId = (req, res, next, val) => {
   next();
 };
 
+const checkBody = (req, res, next) => {
+  const body = req.body;
+  if (!body.name || !body.price) {
+    return res.status(400).json({
+      status: "success",
+      message: "A tour should have a name and price",
+    });
+  }
+  next();
+};
+
 const getAllTours = (req, res) => {
   res.status(200).json({
     status: "success",
@@ -74,4 +85,4 @@ const deleteTour = (req, res) => {
   });
 };
 
-module.exports = { checkId, getAllTours, getTour, createTour, updateTour, deleteTour };
+module.exports = { checkId, checkBody, getAllTours, getTour, createTour, updateTour, deleteTour };
