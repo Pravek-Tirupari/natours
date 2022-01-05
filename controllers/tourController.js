@@ -25,6 +25,29 @@ const getAllTours = async (req, res) => {
     query = query.sort("-createdAt");
   }
 
+  //3) FIELD LIMITING
+  if (req.query.fields) {
+    console.log(req.query.fields);
+    const selectFields = req.query.fields.split(",").join(" ");
+    query = query.select(selectFields);
+  } else {
+    query = query.select("-__v");
+  }
+
+  //4)PAGINATION (LIMITING NUMBER OF RESULTS)
+  const page = +req.query.page || 1;
+  const limit = +req.query.limit || 100;
+  const skipResults = (page - 1) * limit;
+  query = query.skip(skipResults).limit(limit);
+
+  //New method --> To get the number of documents present in the collection
+  if (req.query.page) {
+    const numTours = Tour.countDocuments();
+    if (skipResults >= numTours) {
+      throw new Error("This page does not exist");
+    }
+  }
+
   try {
     const tours = await query;
     res.status(200).json({
@@ -40,6 +63,13 @@ const getAllTours = async (req, res) => {
       message: err,
     });
   }
+};
+
+const aliasTopTours = (req, res, next) => {
+  req.query.limit = "5";
+  req.query.sort = "-ratingsAverage,price";
+  req.query.fields = "name,price,ratingsAverage,summary,difficulty";
+  next();
 };
 
 const getTour = async (req, res) => {
@@ -127,4 +157,4 @@ const deleteTour = async (req, res) => {
   }
 };
 
-module.exports = { getAllTours, getTour, createTour, updateTour, deleteTour };
+module.exports = { getAllTours, aliasTopTours, getTour, createTour, updateTour, deleteTour };
